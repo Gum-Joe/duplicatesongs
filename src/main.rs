@@ -3,6 +3,7 @@
 extern crate id3;
 extern crate mpeg_audio_header;
 
+use std::fmt::format;
 use std::fs::File;
 use std::path::Path;
 use std::collections::HashMap;
@@ -37,6 +38,14 @@ struct Metadata {
 fn handle_duplicates(duplicates: &HashMap<String, Vec<Metadata>>) {
     let mut i = 0;
     let total = duplicates.len();
+    use std::fs::OpenOptions;
+
+    let mut file = OpenOptions::new()
+        .write(true)
+        .create(true)
+        .open("deleted.txt")
+        .unwrap();
+
     for (key, values) in duplicates {
         i += 1;
         println!("==== HANDLE DUPLICIATE: {} ===", key);
@@ -74,13 +83,17 @@ fn handle_duplicates(duplicates: &HashMap<String, Vec<Metadata>>) {
         for (i, metadata) in values.iter().enumerate() {
             if i as u32 + 1 != input {
                 let path = Path::new(&metadata.path);
-                println!("DRY RUN: Delete {}", metadata.path);
-                /*println!("Delete file {}? (y/n)", metadata.path);
+                
+                println!("Delete file {} of {} kbps? (y/n)", metadata.path, metadata.bitrate);
                 let mut confirm = String::new();
                 io::stdin().read_line(&mut confirm).unwrap();
                 if confirm.trim().to_lowercase() == "y" {
-                    std::fs::remove_file(path).unwrap();
-                }*/
+                    println!("DRY RUN: Delete {}", metadata.path);
+                    /*std::fs::remove_file(path).unwrap();*/
+                    // Add to list
+                    file.write(format!("{},\t{}", key, metadata.path).as_bytes()).unwrap();
+
+                }
             }
         }
         println!("Duplicate handled.");
