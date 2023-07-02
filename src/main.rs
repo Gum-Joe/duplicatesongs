@@ -91,7 +91,7 @@ fn handle_duplicates(duplicates: &HashMap<String, Vec<Metadata>>) {
                 let mut confirm = String::new();
                 io::stdin().read_line(&mut confirm).unwrap();
                 if confirm.trim().to_lowercase() == "y" || confirm.trim().to_lowercase() == "" {
-                    println!("[DEL] Delete {}", metadata.path);
+                    println!("[DEL] Deleted {}", metadata.path);
                     std::fs::remove_file(path).unwrap();
                     // Add to list
                     file.write(format!("{},          {},          {}\n", key, metadata.path, newPath).as_bytes()).unwrap();
