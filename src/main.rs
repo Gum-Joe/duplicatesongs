@@ -46,6 +46,8 @@ fn handle_duplicates(duplicates: &HashMap<String, Vec<Metadata>>) {
         .open("deleted.txt")
         .unwrap();
 
+    file.write("NUMBER - NAME - ALBUM - ARTIST,          OLD PATH,          NEW PATH\n".as_bytes()).unwrap();
+
     for (key, values) in duplicates {
         i += 1;
         println!("==== HANDLE DUPLICIATE: {} ===", key);
@@ -75,28 +77,29 @@ fn handle_duplicates(duplicates: &HashMap<String, Vec<Metadata>>) {
 
         if input >= values.len() as u32 + 1 {
             // Do nothing
-            println!("\tDid nothing.");
+            println!("\t[STA] Did nothing.");
             continue;
         }
 
         // Delete all tracks except the selected one
+        let newPath = values.get((input as usize) - 1).unwrap().path.clone();
         for (i, metadata) in values.iter().enumerate() {
             if i as u32 + 1 != input {
                 let path = Path::new(&metadata.path);
                 
-                println!("Delete file {} of {} kbps? (y/n)", metadata.path, metadata.bitrate);
+                println!("[REQ] Delete file {} of {} kbps? (y/n)", metadata.path, metadata.bitrate);
                 let mut confirm = String::new();
                 io::stdin().read_line(&mut confirm).unwrap();
-                if confirm.trim().to_lowercase() == "y" {
-                    println!("DRY RUN: Delete {}", metadata.path);
-                    /*std::fs::remove_file(path).unwrap();*/
+                if confirm.trim().to_lowercase() == "y" || confirm.trim().to_lowercase() == "" {
+                    println!("[DEL] Delete {}", metadata.path);
+                    std::fs::remove_file(path).unwrap();
                     // Add to list
-                    file.write(format!("{},\t{}", key, metadata.path).as_bytes()).unwrap();
+                    file.write(format!("{},          {},          {}\n", key, metadata.path, newPath).as_bytes()).unwrap();
 
                 }
             }
         }
-        println!("Duplicate handled.");
+        println!("[STA] Duplicate handled.");
         print!("");
     }
 }
